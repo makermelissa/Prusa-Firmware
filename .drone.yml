@@ -1,0 +1,61 @@
+kind: pipeline
+name: default
+
+workspace:
+  path: Prusa-Firmware
+
+steps:
+  - name: tests
+    image: vertigo235/fw-build
+    commands:
+      - bash -x test.sh
+    when:
+      event: 
+        - push
+        - tag
+        - pull_request
+  
+  - name: build
+    image: vertigo235/fw-build
+    environment:
+      BUILD_TYPE: GOLD
+    commands:
+      - chmod +x PF-build.sh
+      - chmod +x lang/config.sh
+      - chmod +x lang/fw-clean.sh
+      - chmod +x lang/lang-clean.sh
+      - sed -i -e 's/#define FW_COMMIT_NR   [0-9]*/#define FW_COMMIT_NR  '"$DRONE_BUILD_STARTED"'/' Firmware/Configuration.h
+      - bash -x PF-build.sh Bear_Cal_FW_MK3S-EINSy10a.h ALL $BUILD_TYPE
+      - bash -x PF-build.sh Bear_Cal_FW_MK25S-RAMBo13a.h ALL $BUILD_TYPE
+      - bash -x PF-build.sh Bear_Cal_FW_MK25S-RAMBo10a.h ALL $BUILD_TYPE
+    when:
+      event:
+       - push
+       - tag
+       - pull_request
+  
+  - name: prepare-hex
+    image: vertigo235/fw-build
+    commands:
+      - cd $CI_WORKSPACE
+      - mkdir out
+      - cd $DRONE_WORKSPACE_BASE/Hex-files
+      - mv `find -name "*.zip"` $CI_WORKSPACE/out
+      - mv `find -name "*.hex"` $CI_WORKSPACE/out
+    when:
+      event:
+       - tag
+
+  - name: publish
+    image: plugins/github-release
+    settings:
+      api_key:
+        from_secret: github-token
+      prerelease: true
+      draft: true    
+      checksum: md5
+      files: 
+        - out/*.*
+    when:
+      event: 
+        - tag
