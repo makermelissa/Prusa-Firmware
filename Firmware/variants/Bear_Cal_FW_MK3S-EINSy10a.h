@@ -15,7 +15,7 @@
 #define DEVELOPER
 
 // Printer name
-#define CUSTOM_MENDEL_NAME "Prusa i3 MK3S BEAR"
+#define CUSTOM_MENDEL_NAME "BEAR MK3S CALIBRATION FW"
 
 // Electronics
 #define MOTHERBOARD BOARD_EINSY_1_0a

@@ -18,7 +18,7 @@ steps:
   - name: build
     image: vertigo235/fw-build
     environment:
-      BUILD_TYPE: GOLD
+      BUILD_TYPE: BETA
     commands:
       - chmod +x PF-build.sh
       - chmod +x lang/config.sh
