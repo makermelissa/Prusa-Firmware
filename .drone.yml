@@ -42,9 +42,15 @@ steps:
       - cd $DRONE_WORKSPACE_BASE/Hex-files
       - mv `find -name "*.zip"` $CI_WORKSPACE/out
       - mv `find -name "*.hex"` $CI_WORKSPACE/out
+      - cd $CI_WORKSPACE/out
+      - unzip \*.zip
+      - rm *.zip
+      - cd $CI_WORKSPACE
+      - bash rename_and_zip.sh
     when:
       event:
        - tag
+       - push
 
   - name: publish
     image: plugins/github-release
